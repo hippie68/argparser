@@ -10,7 +10,7 @@ def convert_number(arg: str) -> int:
     try:
         number = int(arg)
     except ValueError:
-        raise argparser.ParsingError(f"Not a number: {number}.")
+        raise argparser.ParsingError(f"Not a number: {arg}.")
 
     if number < 10 or number > 20:
         raise argparser.ParsingError(
@@ -30,8 +30,8 @@ settings = {
 }
 
 cmd = argparser.Command(
-    "main.py",
-    "[OPTION...] OPERAND...",
+    "example.py",
+    "[OPTION...] [OPERAND...]",
     "This is a test program that uses the argparser module to show how to implement"
     " different options. Notice how the help screen properly word-wraps the text.\n\n"
     "This includes newline characters and indentation:\n\n"
@@ -40,12 +40,12 @@ cmd = argparser.Command(
     "\nThank you for trying this out.",
     [
         argparser.Option(
-            "v",
-            "verbose",
-            None,
-            "Enable verbose program output.",
+            short_name="v",
+            long_name="verbose",
+            arg=None,
+            description="Enable verbose program output.",
             # To modify variables, settattr() can be used.
-            lambda: settings.update({"verbose_flag": True}),
+            callback=lambda: settings.update({"verbose_flag": True}),
         ),
         argparser.Option(
             "f",
@@ -57,17 +57,17 @@ cmd = argparser.Command(
             lambda arg: settings.update({"filename": arg}),
         ),
         argparser.Option(
-            short_name="h",
-            long_name="help",
-            arg=None,
-            description="Print help screen and quit.",
+            "h",
+            "help",
+            None,
+            "Print help screen and quit.",
             # To implement the "and quit", a tuple can be used to chain the commands.
-            callback=lambda: (argparser.print_help(cmd), sys.exit(0)),
+            lambda: (argparser.print_help(cmd), sys.exit(0)),
         ),
         argparser.Option(
             "l",
             "log",
-            "[LOG_FILE]",
+            "[LOG_FILE]",  # This option-argument is optional.
             f"Enable loggging (default log file: {settings['log_file']}).",
             lambda arg: (
                 settings.update({"log_enabled": True}),
@@ -79,7 +79,7 @@ cmd = argparser.Command(
         argparser.Option(
             "n",
             None,
-            "NUMBER",
+            "NUMBER-----------------------------------------",
             "Set n to a NUMBER between 10 and 20.",
             # Here we use a dedicated function to handle ValueError exceptions and
             # perform range checking.

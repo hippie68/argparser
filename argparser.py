@@ -241,7 +241,7 @@ def print_help(cmd: Command, file=sys.stdout):
             s += f"--{option.long_name}"
             if option.arg:
                 if option.arg.startswith("["):
-                    s += f"={option.arg}"
+                    s += f"[={option.arg[1:]}"
                 else:
                     s += f" {option.arg}"
         s += "  "
@@ -346,6 +346,6 @@ def print_help(cmd: Command, file=sys.stdout):
             print_block(
                 option[1],
                 len(usage_string),
-                MAX_LINE_LENGTH - MIN_DESCRIPTION_WIDTH,
+                longest,
                 file,
             )
