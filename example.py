@@ -79,7 +79,7 @@ cmd = argparser.Command(
         argparser.Option(
             "n",
             None,
-            "NUMBER-----------------------------------------",
+            "NUMBER",
             "Set n to a NUMBER between 10 and 20.",
             # Here we use a dedicated function to handle ValueError exceptions and
             # perform range checking.
