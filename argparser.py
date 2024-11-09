@@ -7,6 +7,7 @@ from typing import Callable
 MAX_COLUMNS = get_terminal_size()[0]
 MAX_LINE_LENGTH = 80 if MAX_COLUMNS > 80 else MAX_COLUMNS
 MIN_DESCRIPTION_WIDTH = int(MAX_LINE_LENGTH // 1.618)
+SHIFT_WIDTH = 2  # Number of spaces added when preserving indentation.
 
 
 class ParsingError(Exception):
@@ -266,6 +267,13 @@ def print_help(cmd: Command, file=sys.stdout):
             file: The output's destination.
         """
 
+        def get_indent(s: str) -> int:
+            indent = 0
+            s_len = len(s)
+            while indent < s_len and s[indent] == " ":
+                indent += 1
+            return indent
+
         def next_word_len(s: str) -> int:
             ignore_spaces = False
             s_len = len(s)
@@ -288,7 +296,8 @@ def print_help(cmd: Command, file=sys.stdout):
         if start_col > indent:
             start_col = indent
 
-        preserve_indentation_due_to_linebreak = False
+        linebreak_encountered = False
+        indentation = 0  # Indentation width found in the string.
 
         while True:
             word_len = next_word_len(string)
@@ -299,24 +308,29 @@ def print_help(cmd: Command, file=sys.stdout):
                 print(file=file)
                 col = 0
                 string = string[1:]
-                preserve_indentation_due_to_linebreak = True
+                linebreak_encountered = True
+                indentation = 0
                 continue
 
             if col == 0:
                 col = start_col
                 print(" " * col, end="", file=file)
+                if indentation:
+                    print(" " * (indentation + SHIFT_WIDTH), end="", file=file)
+                    col += indentation + SHIFT_WIDTH
                 if string[0] == " ":
-                    if not preserve_indentation_due_to_linebreak:
+                    if not linebreak_encountered:
                         string = string[1:]
                         continue
                     else:
-                        preserve_indentation_due_to_linebreak = False
-            else:
-                preserve_indentation_due_to_linebreak = False
+                        indentation = get_indent(string)
+                linebreak_encountered = False
 
             remaining_cols = MAX_LINE_LENGTH - col
             if word_len > remaining_cols:
-                if col == start_col:
+                if col == start_col or (
+                    indentation and col == start_col + indentation + SHIFT_WIDTH
+                ):
                     print(string[:remaining_cols], end="", file=file)
                     string = string[remaining_cols:]
                 print(file=file)

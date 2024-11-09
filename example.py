@@ -35,7 +35,7 @@ cmd = argparser.Command(
     "This is a test program that uses the argparser module to show how to implement"
     " different options. Notice how the help screen properly word-wraps the text.\n\n"
     "This includes newline characters and indentation:\n\n"
-    "   - As you can see, indentation entered on purpose...\n"
+    "   - As you can see, indentation entered on purpose, even if the line is very long and about to be wrapped...\n"
     "   - ...is being respected.\n"
     "\nThank you for trying this out.",
     [
