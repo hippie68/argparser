@@ -7,7 +7,6 @@ from typing import Callable
 MAX_COLUMNS = get_terminal_size()[0]
 MAX_LINE_LENGTH = 80 if MAX_COLUMNS > 80 else MAX_COLUMNS
 MIN_DESCRIPTION_WIDTH = int(MAX_LINE_LENGTH // 1.618)
-SHIFT_WIDTH = 2  # Number of spaces added when preserving indentation.
 
 
 class ParsingError(Exception):
@@ -269,8 +268,14 @@ def print_help(cmd: Command, file=sys.stdout):
 
         def get_indent(s: str) -> int:
             indent = 0
+            bullet_point = False
             s_len = len(s)
-            while indent < s_len and s[indent] == " ":
+            while indent < s_len:
+                if not bullet_point and s[indent] in "-*":
+                    if indent + 1 < s_len and s[indent + 1] == " ":
+                        bullet_point = True
+                elif s[indent] != " ":
+                    break
                 indent += 1
             return indent
 
@@ -316,21 +321,19 @@ def print_help(cmd: Command, file=sys.stdout):
                 col = start_col
                 print(" " * col, end="", file=file)
                 if indentation:
-                    print(" " * (indentation + SHIFT_WIDTH), end="", file=file)
-                    col += indentation + SHIFT_WIDTH
+                    print(" " * (indentation), end="", file=file)
+                    col += indentation
                 if string[0] == " ":
-                    if not linebreak_encountered:
+                    if linebreak_encountered:
+                        indentation = get_indent(string)
+                    else:
                         string = string[1:]
                         continue
-                    else:
-                        indentation = get_indent(string)
                 linebreak_encountered = False
 
             remaining_cols = MAX_LINE_LENGTH - col
             if word_len > remaining_cols:
-                if col == start_col or (
-                    indentation and col == start_col + indentation + SHIFT_WIDTH
-                ):
+                if col == start_col or (indentation and col == start_col + indentation):
                     print(string[:remaining_cols], end="", file=file)
                     string = string[remaining_cols:]
                 print(file=file)
